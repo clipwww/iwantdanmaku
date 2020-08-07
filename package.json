@@ -1,0 +1,23 @@
+{
+  "name": "iwantdannmaku",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npx parcel src/index.html",
+    "build": "npx parcel build src/index.html"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "danmaku": "^2.0.0",
+    "parcel-bundler": "^1.12.4",
+    "postcss-modules": "^3.1.0",
+    "tailwindcss": "^1.4.6",
+    "vue": "^3.0.0-rc.5"
+  },
+  "devDependencies": {
+    "sass": "^1.26.10",
+    "typescript": "^3.9.7"
+  }
+}
