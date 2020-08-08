@@ -1,4 +1,4 @@
-import { createApp, ref, reactive, watch, nextTick } from 'vue/dist/vue.esm-bundler.js';
+import { createApp, ref, nextTick } from 'vue/dist/vue.esm-bundler.js';
 import Danmaku from 'danmaku';
 
 function readAsText(file: File): Promise<string> {
@@ -24,6 +24,7 @@ createApp({
 
     async function initDanmaku() {
       await nextTick();
+      const vHeight = document.getElementById('js-video').clientHeight;
       
       const newComments = comments.value.map(item => {
         return {
@@ -35,7 +36,7 @@ createApp({
           //   textShadow: '-1px -1px #000, -1px 1px #000, 1px -1px #000, 1px 1px #000',
           // },
           style: {
-            font: '16px sans-serif',
+            font: `${Math.round(vHeight / 25)}px sans-serif`,
             textAlign: 'start',
             textBaseline: 'bottom',
             direction: 'inherit',
@@ -49,7 +50,6 @@ createApp({
       })
 
       if (danmaku) {
-        // @ts-ignore
         danmaku.destroy();
         danmaku = null;
         return;
