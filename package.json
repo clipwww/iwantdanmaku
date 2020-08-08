@@ -15,9 +15,11 @@
     "parcel-bundler": "^1.12.4",
     "postcss-modules": "^3.1.0",
     "tailwindcss": "^1.4.6",
-    "vue": "^3.0.0-rc.5"
+    "vue": "^3.0.0-rc.5",
+    "vue-loader": "^16.0.0-beta.4"
   },
   "devDependencies": {
+    "@vue/compiler-sfc": "^3.0.0-rc.5",
     "sass": "^1.26.10",
     "typescript": "^3.9.7"
   }

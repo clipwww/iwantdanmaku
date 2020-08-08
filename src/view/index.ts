@@ -1,4 +1,4 @@
-import { createApp, ref, nextTick } from 'vue/dist/vue.esm-bundler.js';
+import { ref, nextTick, defineComponent, watch, Ref } from 'vue';
 import Danmaku from 'danmaku';
 
 function readAsText(file: File): Promise<string> {
@@ -11,16 +11,27 @@ function readAsText(file: File): Promise<string> {
 };
 
 
-createApp({
-  setup() {
+export default defineComponent({
+   setup() {
     const videoSrc = ref(''); 
     const inputValue = ref('');
     const danmakuId = ref('');
+    const engine: Ref<'dom' | 'canvas'> = ref('canvas');
     const comments = ref([]);
     const delay = ref(0);
     const isDragover = ref(false)
     const isLoading = ref(false);
     let danmaku: Danmaku = null;
+
+    watch(engine, () => {
+      initDanmaku();
+    }, { immediate: false })
+
+    watch(videoSrc, (val) => {
+      if (!val && danmaku) {
+        danmaku.destroy();
+      }
+    })
 
     async function initDanmaku() {
       await nextTick();
@@ -30,13 +41,13 @@ createApp({
         return {
           text: item.msg || item.text,
           time: item.time + delay.value,
-          // style: {
-          //   fontSize: '16px',
-          //   color: '#ffffff',
-          //   textShadow: '-1px -1px #000, -1px 1px #000, 1px -1px #000, 1px 1px #000',
-          // },
-          style: {
-            font: `${Math.round(vHeight / 25)}px sans-serif`,
+          style: engine.value === 'dom' ? {
+            fontSize: `${Math.round(vHeight / 23)}px`,
+            fontWeight: 'bold',
+            color: '#ffffff',
+            textShadow: '-1px -1px #000, -1px 1px #000, 1px -1px #000, 1px 1px #000',
+          } : {
+            font: `${Math.round(vHeight / 23)}px sans-serif`,
             textAlign: 'start',
             textBaseline: 'bottom',
             direction: 'inherit',
@@ -51,15 +62,15 @@ createApp({
 
       if (danmaku) {
         danmaku.destroy();
-        danmaku = null;
-        return;
       }
 
       danmaku = new Danmaku({
-        engine: 'canvas',
+        // engine: 'canvas',
         // engine: 'dom',
+        engine: engine.value,
         container: document.getElementById('js-video-container'),
         media: document.getElementById('js-video') as HTMLVideoElement,
+        // @ts-ignore
         comments: newComments
       });
     }
@@ -104,6 +115,7 @@ createApp({
     return {
       videoSrc,
       inputValue,
+      engine,
       delay,
       danmakuId,
       isDragover,
@@ -115,4 +127,4 @@ createApp({
       getDanmaku,
     }
   }
-}).mount('#app')
+})
