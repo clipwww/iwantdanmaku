@@ -1,12 +1,12 @@
 {
-  "name": "iwantdannmaku",
+  "name": "iwantdanmaku",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "dev": "npx parcel src/index.html",
     "prebuild": "rm -rf dist",
-    "build": "npx parcel build src/index.html --public-url /iwantdannmaku/ --no-source-maps --detailed-report"
+    "build": "npx parcel build src/index.html --public-url /iwantdanmaku/ --no-source-maps --detailed-report"
   },
   "author": "",
   "license": "ISC",
