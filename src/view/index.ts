@@ -1,5 +1,13 @@
-import { ref, nextTick, defineComponent, watch, Ref } from 'vue';
+import { ref, nextTick, defineComponent, watch, onMounted, Ref } from 'vue';
 import Danmaku from 'danmaku';
+
+interface DanmakuVM {
+  text: string
+  msg: string
+  time: number
+  color?: string
+  mode?: 'rtl' | 'ltr' | 'top' | 'bottom'
+}
 
 function readAsText(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -12,18 +20,19 @@ function readAsText(file: File): Promise<string> {
 
 
 export default defineComponent({
-   setup() {
-    const videoSrc = ref(''); 
+  setup() {
+    const videoSrc = ref('');
     const inputValue = ref('');
-    const danmakuId = ref('');
-    const engine: Ref<'dom' | 'canvas'> = ref('canvas');
+    const danmakuUrl = ref('');
+    const engine: Ref<'dom' | 'canvas'> = ref('dom');
     const comments = ref([]);
     const delay = ref(0);
     const isDragover = ref(false)
     const isLoading = ref(false);
+    const isFullscreen = ref(false);
     let danmaku: Danmaku = null;
 
-    watch(engine, () => {
+    watch([engine, isFullscreen], () => {
       initDanmaku();
     }, { immediate: false })
 
@@ -33,30 +42,45 @@ export default defineComponent({
       }
     })
 
+    onMounted(() => {
+      document.addEventListener('fullscreenchange', (e) => {
+        console.log('on fullscreenchange')
+        isFullscreen.value = document.fullscreen
+      })
+      document.addEventListener('resize', () => {
+        if (danmaku) {
+          initDanmaku();
+        }
+      })
+    })
+
     async function initDanmaku() {
       await nextTick();
       const vHeight = document.getElementById('js-video').clientHeight;
-      
-      const newComments = comments.value.map(item => {
+      let fontSize = Math.round(vHeight / 23);
+      fontSize = fontSize < 16 ? 16 : fontSize;
+
+      const newComments = comments.value.map((item: DanmakuVM) => {
         return {
           text: item.msg || item.text,
           time: item.time + delay.value,
+          mode: item.mode || 'rtl',
           style: engine.value === 'dom' ? {
-            fontSize: `${Math.round(vHeight / 23)}px`,
+            fontSize: `${fontSize}px`,
             fontWeight: 'bold',
-            color: '#ffffff',
+            color: item.color || '#ffffff',
             textShadow: '-1px -1px #000, -1px 1px #000, 1px -1px #000, 1px 1px #000',
-          } : {
-            font: `${Math.round(vHeight / 23)}px sans-serif`,
-            textAlign: 'start',
-            textBaseline: 'bottom',
-            direction: 'inherit',
-            fillStyle: '#fff',
-            strokeStyle: '#fff',
-            lineWidth: 1.0,
-            shadowColor: '#000',
-            shadowBlur: 1,
-          },
+          } as CSSStyleDeclaration : {
+              font: `${fontSize}px sans-serif`,
+              textAlign: 'start',
+              textBaseline: 'bottom',
+              direction: 'inherit',
+              fillStyle: item.color || '#ffffff',
+              strokeStyle: '#fff',
+              lineWidth: 1.0,
+              shadowColor: '#000',
+              shadowBlur: 1,
+            } as CanvasRenderingContext2D,
         };
       })
 
@@ -70,7 +94,6 @@ export default defineComponent({
         engine: engine.value,
         container: document.getElementById('js-video-container'),
         media: document.getElementById('js-video') as HTMLVideoElement,
-        // @ts-ignore
         comments: newComments
       });
     }
@@ -78,16 +101,18 @@ export default defineComponent({
     async function getDanmaku() {
       try {
         isLoading.value = true;
-        const response = await fetch(`https://mechakucha-api.herokuapp.com/himawari/${danmakuId.value}/danmaku`);
-      const ret = await response.json();
+        const response = await fetch(danmakuUrl.value);
+        const ret = await response.json();
 
-      if (!ret.success) {
-        return;
-      }
+        if (!ret.success) {
+          return;
+        }
 
-      comments.value = ret.items;
-      } catch(err) {
+        comments.value = ret.items;
+        initDanmaku();
+      } catch (err) {
         console.log(err)
+        alert(err);
       } finally {
         isLoading.value = false;
       }
@@ -110,21 +135,28 @@ export default defineComponent({
       console.log(danmaku)
       comments.value = danmaku;
       initDanmaku();
-    }   
+    }
+
+    function openFullscreen() {
+      const element = document.documentElement;
+      element.requestFullscreen();
+    }
 
     return {
       videoSrc,
       inputValue,
       engine,
       delay,
-      danmakuId,
+      danmakuUrl,
       isDragover,
       isLoading,
+      isFullscreen,
 
       onDrop,
       onUpload,
       onDanmakuUpload,
       getDanmaku,
+      openFullscreen
     }
   }
 })

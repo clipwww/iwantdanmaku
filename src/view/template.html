@@ -1,8 +1,8 @@
 <div>
   <div class="container mx-auto p-2">
-    <div id="js-video-container" class="video-wrapper bg-black">
+    <div id="js-video-container" class="video-wrapper bg-black" :class="{ 'is-fullscreen': isFullscreen }">
       <video v-if="videoSrc" id="js-video" :src="videoSrc" 
-      controls 
+      controls
       playsinline
       webkit-playsinline></video>
       <div v-if="!videoSrc" 
@@ -26,20 +26,27 @@
     </div>
   
     <div v-if="videoSrc" class="my-3">
-      <button class="bg-green-500 py-2 px-5 rounded" @click="videoSrc = '';inputValue = ''">清除影片</button>
+      <div class="flex justify-between items-center mb-5">
+        <button class="bg-blue-500 py-2 px-5 rounded" @click="openFullscreen">全螢幕</button>
+        <button class="bg-green-500 py-2 px-5 rounded" @click="videoSrc = '';inputValue = ''">清除影片</button>
+      </div>
       
-      <div class="w-full rounded flex items-center relative my-5">
+      <div class="w-full rounded flex items-center relative my-2">
         <div class="lg:w-1/2 w-full border-solid border border-gray-300 rounded flex justify-between">
           <div class="p-2">
             <input type="file" class="w-full" @change="onDanmakuUpload" />
           </div>
           <div class="whitespace-no-wrap bg-gray-300 text-black p-2">上傳彈幕檔</div>
         </div>
-       
+      </div>
+      <div class="text-sm text-gray-400 my-1">或</div>
+      <div class="lg:w-1/2 w-full flex items-center">
+        <input class="w-3/4 p-2 rounded-l text-black outline-none focus:shadow-outline w-full" type="text" v-model="danmakuUrl" placeholder="請輸入彈幕連結" />
+        <button class="w-1/4 bg-green-500 p-2 rounded-r whitespace-no-wrap" :class="!danmakuUrl ? 'opacity-75 cursor-not-allowed' : ''" :disabled="!danmakuUrl" @click="getDanmaku">載入</button>
       </div>
   
     
-      <div class="p-1 inline-flex items-center">
+      <div class="inline-flex items-center my-3">
         <div class="bg-gray-500 p-2 rounded-l whitespace-no-wrap">延遲</div>
         <input class="p-2 text-black outline-none focus:shadow-outline w-full" type="number" v-model="delay" />
         <div class="bg-gray-500 p-2 rounded-r whitespace-no-wrap">秒</div>
