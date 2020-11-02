@@ -1,8 +1,12 @@
 module.exports = {
-  purge: [
-    './src/**/*.html',
-    './src/**/*.vue',
-  ],
+  purge: {
+    enabled: true,
+    layers: ['components', 'utilities'],
+    content: [
+      './src/**/*.html',
+      './src/**/*.vue',
+    ]
+  },
   theme: {
     extend: {
       screens: {
